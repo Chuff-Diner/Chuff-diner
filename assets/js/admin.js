@@ -2,6 +2,10 @@ const adminStatus = document.getElementById("admin-status");
 const refreshButton = document.getElementById("refresh-orders-btn");
 const tableBody = document.getElementById("orders-table-body");
 
+const LOCAL_ORDER_STORAGE_KEY = "chuff-diner-demo-orders";
+
+let apiAvailable = null;
+
 function formatCurrency(amount) {
   return `R${Number(amount).toFixed(2)}`;
 }
@@ -14,6 +18,29 @@ function formatDate(value) {
 function updateStatus(message, type = "info") {
   adminStatus.className = `alert alert-${type}`;
   adminStatus.textContent = message;
+}
+
+function getStoredOrders() {
+  try {
+    const rawOrders = window.localStorage.getItem(LOCAL_ORDER_STORAGE_KEY);
+    return rawOrders ? JSON.parse(rawOrders) : [];
+  } catch (_error) {
+    return [];
+  }
+}
+
+async function requestJson(path) {
+  if (apiAvailable === false) {
+    throw new Error("API unavailable");
+  }
+
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Request failed for ${path}`);
+  }
+
+  apiAvailable = true;
+  return response.json();
 }
 
 function renderOrders(orders) {
@@ -44,16 +71,21 @@ async function loadOrders() {
   updateStatus("Loading orders...", "info");
 
   try {
-    const response = await fetch("/api/orders");
-    if (!response.ok) {
-      throw new Error("Failed to load orders");
-    }
-
-    const orders = await response.json();
+    const orders = apiAvailable === false ? getStoredOrders() : await requestJson("/api/orders");
     renderOrders(orders);
+    if (apiAvailable === false) {
+      updateStatus(`Loaded ${orders.length} demo order(s) from this browser.`, "warning");
+      return;
+    }
     updateStatus(`Loaded ${orders.length} order(s).`, "success");
-  } catch (error) {
-    updateStatus(error.message, "danger");
+  } catch (_error) {
+    apiAvailable = false;
+    const orders = getStoredOrders();
+    renderOrders(orders);
+    updateStatus(
+      `Backend API is unavailable here. Loaded ${orders.length} demo order(s) from this browser instead.`,
+      "warning"
+    );
   }
 }
 

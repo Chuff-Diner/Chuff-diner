@@ -8,6 +8,15 @@ Chuff Diner is now a full-stack app with:
 - Checkout modal for customer name, item, and quantity
 - Admin dashboard to view live orders
 
+## GitHub Pages
+
+The repository can be published on GitHub Pages as a static demo.
+
+- Images and frontend layout will work normally on Pages.
+- Because GitHub Pages cannot run the Express backend, the site automatically falls back to demo data.
+- In demo mode, orders are saved in the browser using localStorage.
+- For the full API-backed experience, run the app locally with `npm start`.
+
 ## Run locally
 
 1. Install dependencies:
