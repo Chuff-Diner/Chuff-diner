@@ -34,47 +34,26 @@ If you want the live GitHub URL to use the real Express API instead of demo mode
 
 Right now, the GitHub Pages version is prepared to run as a static demo, while the local Node server remains the full version.
 
-*** Add File: c:\Users\tshep\Desktop\Chuff-Diner\Chuff-diner\.github\workflows\pages.yml
-name: Deploy GitHub Pages
+## Netlify fallback hosting
 
-on:
-	push:
-		branches:
-			- main
-	workflow_dispatch:
+If your network blocks `github.io`, deploy the same static version to Netlify.
 
-permissions:
-	contents: read
-	pages: write
-	id-token: write
+This repo is now preconfigured with `netlify.toml`.
 
-concurrency:
-	group: pages
-	cancel-in-progress: true
+Netlify setup:
 
-jobs:
-	deploy:
-		runs-on: ubuntu-latest
-		environment:
-			name: github-pages
-			url: ${{ steps.deployment.outputs.page_url }}
-		steps:
-			- name: Checkout
-				uses: actions/checkout@v4
+1. Open Netlify and choose `Add new site` -> `Import an existing project`.
+2. Connect GitHub and select `Chuff-Diner/Chuff-diner`.
+3. Build settings:
+   - Build command: leave empty
+   - Publish directory: `.`
+4. Deploy.
 
-			- name: Setup Pages
-				uses: actions/configure-pages@v5
+After deploy:
 
-			- name: Upload artifact
-				uses: actions/upload-pages-artifact@v3
-				with:
-					path: .
-
-			- name: Deploy to GitHub Pages
-				id: deployment
-				uses: actions/deploy-pages@v4
-
-*** Add File: c:\Users\tshep\Desktop\Chuff-Diner\Chuff-diner\.nojekyll
+- Main site will load from your Netlify URL.
+- `/admin` will work and route to `admin.html`.
+- The same static demo fallback behavior applies (localStorage orders when API is unavailable).
 
 
 ## Run locally
